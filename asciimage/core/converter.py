@@ -77,8 +77,8 @@ def show_ascii_image(ascii_array):
 
 
 def convert_image(image_path):
-    image = Image.open(image_path)
-    image = image.convert("L")  # Convert to grayscale
+    image = Image.open(image_path).convert("RGBA")  # Open in RGBA mode to access alpha channel
+
     width, height = image.size
 
     image_array = np.array(image)
@@ -86,8 +86,13 @@ def convert_image(image_path):
 
     for i in range(height):
         for j in range(width):
-            pixel_light_value = image_array[i, j]
-            ascii_array[i, j] = pixel_to_ascii(pixel_light_value)
+            r, g, b, a = image_array[i, j]
+            if a < 128:  # If alpha value is less than 128, then it is transparent.
+                ascii_array[i, j] = " "
+            else:
+                # Convert to grayscale using the luminosity method
+                pixel_light_value = int(0.299 * r + 0.587 * g + 0.114 * b)
+                ascii_array[i, j] = pixel_to_ascii(pixel_light_value)
 
     return ascii_array
 
